@@ -1,0 +1,84 @@
+.stats-dashboard {
+  margin: 0 1rem 1.5rem;
+  padding: 1.25rem;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+}
+
+.stats-dashboard h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.stat-card {
+  background-color: #111;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.stat-label {
+  color: #999;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.genre-distribution h3 {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.genre-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.genre-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 40px;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.genre-name {
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.genre-bar-track {
+  height: 8px;
+  background: #333;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.genre-bar-fill {
+  height: 100%;
+  background: #e50914;
+  border-radius: 999px;
+}
+
+.genre-count {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+@media (max-width: 639px) {
+  .genre-row {
+    grid-template-columns: 90px 1fr 32px;
+  }
+}
