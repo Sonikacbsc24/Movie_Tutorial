@@ -27,12 +27,15 @@ const RATING_OPTIONS = [
 
 function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchError, setSearchError] = useState("");
   const [movies, setMovies] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [minRating, setMinRating] = useState(0);
   const { favorites } = useMovieContext();
+
+  const isSearchValid = searchQuery.trim().length >= 2;
 
   useEffect(() => {
     const loadPopularMovies = async () => {
@@ -50,14 +53,10 @@ function Home() {
     loadPopularMovies();
   }, []);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    if (loading) return;
-
+  const runSearch = async (query) => {
     setLoading(true);
     try {
-      const searchResults = await searchMovies(searchQuery);
+      const searchResults = await searchMovies(query);
       setMovies(searchResults);
       setError(null);
     } catch (err) {
@@ -66,6 +65,38 @@ function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Debounced search: wait until typing stops, then query the API.
+  // Cleanup clears the timer so stale keystrokes do not fire extra requests.
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (query.length < 3) {
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      runSearch(query);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+
+    if (!searchQuery.trim()) {
+      setSearchError("Enter a movie title to search.");
+      return;
+    }
+
+    if (searchQuery.trim().length < 2) {
+      setSearchError("Search must be at least 2 characters.");
+      return;
+    }
+
+    setSearchError("");
+    await runSearch(searchQuery.trim());
   };
 
   const filteredMovies = useMemo(() => {
@@ -79,18 +110,22 @@ function Home() {
 
   return (
     <div className="home">
-      <form onSubmit={handleSearch} className="search-form">
+      <form onSubmit={handleSearch} className="search-form" noValidate>
         <input
           type="text"
           placeholder="Search for movies..."
-          className="search-input"
+          className={`search-input ${searchError ? "invalid" : ""}`}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setSearchError("");
+          }}
         />
-        <button type="submit" className="search-button">
+        <button type="submit" className="search-button" disabled={!isSearchValid}>
           Search
         </button>
       </form>
+      {searchError && <p className="search-error">{searchError}</p>}
 
       <div className="filters">
         <div className="filter-group">

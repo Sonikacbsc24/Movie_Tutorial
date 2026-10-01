@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { loginUser, registerUser } from "../services/api";
 
 const AuthContext = createContext();
 
@@ -16,9 +17,18 @@ export function AuthProvider({ children }) {
     setReady(true);
   }, []);
 
-  const login = (userData) => {
+  const persistUser = (userData) => {
     setUser(userData);
     localStorage.setItem("movieAppUser", JSON.stringify(userData));
+    return userData;
+  };
+
+  const login = async (credentials) => {
+    return persistUser(await loginUser(credentials));
+  };
+
+  const register = async (credentials) => {
+    return persistUser(await registerUser(credentials));
   };
 
   const logout = () => {
@@ -31,6 +41,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(user),
     ready,
     login,
+    register,
     logout,
   };
 

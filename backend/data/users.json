@@ -1,0 +1,32 @@
+{
+  "demo": {
+    "id": "demo",
+    "username": "demo",
+    "password": "password123",
+    "createdAt": "2026-10-01T04:30:00.000Z"
+  },
+  "lola-gmail-com": {
+    "id": "lola-gmail-com",
+    "username": "lola@gmail.com",
+    "password": "lola123",
+    "createdAt": "2026-10-01T04:30:00.000Z"
+  },
+  "john-gmail-com": {
+    "id": "john-gmail-com",
+    "username": "john@gmail.com",
+    "password": "john123",
+    "createdAt": "2026-10-01T04:30:00.000Z"
+  },
+  "newuser": {
+    "id": "newuser",
+    "username": "newuser",
+    "password": "secret1",
+    "createdAt": "2026-10-01T04:45:56.528Z"
+  },
+  "dustin-gmail-com": {
+    "id": "dustin-gmail-com",
+    "username": "dustin@gmail.com",
+    "password": "dustinsteve",
+    "createdAt": "2026-10-01T04:48:18.745Z"
+  }
+}

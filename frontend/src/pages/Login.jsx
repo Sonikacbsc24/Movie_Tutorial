@@ -3,18 +3,33 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import "../css/Login.css";
 
+// CLASS COMPONENT: LoginForm
+// Demonstrates class-based state, controlled inputs, event handling, and validation.
 class LoginForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      mode: "login",
       username: "",
       password: "",
+      confirmPassword: "",
       errors: {},
       formError: "",
+      submitting: false,
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.toggleMode = this.toggleMode.bind(this);
+  }
+
+  toggleMode() {
+    this.setState((prev) => ({
+      mode: prev.mode === "login" ? "register" : "login",
+      errors: {},
+      formError: "",
+      confirmPassword: "",
+    }));
   }
 
   handleChange(event) {
@@ -31,7 +46,7 @@ class LoginForm extends Component {
   }
 
   validate() {
-    const { username, password } = this.state;
+    const { username, password, confirmPassword, mode } = this.state;
     const errors = {};
     const identifier = username.trim();
 
@@ -51,11 +66,19 @@ class LoginForm extends Component {
       errors.password = "Password must be at least 6 characters.";
     }
 
+    if (mode === "register") {
+      if (!confirmPassword) {
+        errors.confirmPassword = "Confirm your password.";
+      } else if (confirmPassword !== password) {
+        errors.confirmPassword = "Passwords do not match.";
+      }
+    }
+
     this.setState({ errors });
     return Object.keys(errors).length === 0;
   }
 
-  handleSubmit(event) {
+  async handleSubmit(event) {
     event.preventDefault();
 
     if (!this.validate()) {
@@ -63,22 +86,49 @@ class LoginForm extends Component {
       return;
     }
 
-    const identifier = this.state.username.trim();
-    this.props.onLogin({
-      username: identifier,
-      loggedInAt: new Date().toISOString(),
-    });
+    this.setState({ submitting: true, formError: "" });
+    const credentials = {
+      username: this.state.username.trim(),
+      password: this.state.password,
+    };
+
+    try {
+      if (this.state.mode === "register") {
+        await this.props.onRegister(credentials);
+      } else {
+        await this.props.onLogin(credentials);
+      }
+    } catch (error) {
+      this.setState({
+        formError: error.message || "Request failed. Is the backend running?",
+        submitting: false,
+      });
+      return;
+    }
+
+    this.setState({ submitting: false });
   }
 
   render() {
-    const { username, password, errors, formError } = this.state;
+    const {
+      mode,
+      username,
+      password,
+      confirmPassword,
+      errors,
+      formError,
+      submitting,
+    } = this.state;
+    const isRegister = mode === "register";
 
     return (
       <div className="login-page">
         <div className="login-card">
-          <h1>Sign in</h1>
+          <h1>{isRegister ? "Create account" : "Sign in"}</h1>
           <p className="login-subtitle">
-            Class component login with form handling, events, and validation.
+            {isRegister
+              ? "New users are saved on the server with a password."
+              : "Log in with an existing account. Passwords are checked on the API."}
           </p>
 
           <form className="login-form" onSubmit={this.handleSubmit} noValidate>
@@ -109,23 +159,50 @@ class LoginForm extends Component {
                 onChange={this.handleChange}
                 className={errors.password ? "invalid" : ""}
                 placeholder="At least 6 characters"
-                autoComplete="current-password"
+                autoComplete={isRegister ? "new-password" : "current-password"}
               />
               {errors.password && (
                 <span className="field-error">{errors.password}</span>
               )}
             </div>
 
+            {isRegister && (
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm password</label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={this.handleChange}
+                  className={errors.confirmPassword ? "invalid" : ""}
+                  placeholder="Re-enter password"
+                  autoComplete="new-password"
+                />
+                {errors.confirmPassword && (
+                  <span className="field-error">{errors.confirmPassword}</span>
+                )}
+              </div>
+            )}
+
             {formError && <div className="form-error">{formError}</div>}
 
-            <button type="submit" className="login-button">
-              Login
+            <button type="submit" className="login-button" disabled={submitting}>
+              {submitting
+                ? isRegister
+                  ? "Creating account..."
+                  : "Signing in..."
+                : isRegister
+                  ? "Create account"
+                  : "Login"}
             </button>
           </form>
 
-          <p className="login-hint">
-            Demo login: any valid username/email and a password of 6+ characters.
-          </p>
+          <button type="button" className="mode-toggle" onClick={this.toggleMode}>
+            {isRegister
+              ? "Already have an account? Log in"
+              : "New here? Create an account"}
+          </button>
         </div>
       </div>
     );
@@ -133,15 +210,20 @@ class LoginForm extends Component {
 }
 
 function Login() {
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = (user) => {
-    login(user);
+  const afterAuth = async (action, credentials) => {
+    await action(credentials);
     navigate("/");
   };
 
-  return <LoginForm onLogin={handleLogin} />;
+  return (
+    <LoginForm
+      onLogin={(credentials) => afterAuth(login, credentials)}
+      onRegister={(credentials) => afterAuth(register, credentials)}
+    />
+  );
 }
 
 export default Login;

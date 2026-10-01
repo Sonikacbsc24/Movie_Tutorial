@@ -61,18 +61,38 @@
     }
 }
 
-/* Responsive layout */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .favorites {
-        padding: 1rem;
+        padding: 0.5rem;
     }
 
     .favorites h2 {
-        font-size: 2rem;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
     }
 
     .favorites .movies-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 1rem;
+    }
+
+    .favorites-empty {
+        padding: 2rem 1rem;
+        margin: 1rem auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .favorites .movies-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .favorites-empty h2 {
+        font-size: 1.4rem;
+    }
+
+    .favorites-empty p {
+        font-size: 1rem;
     }
 }

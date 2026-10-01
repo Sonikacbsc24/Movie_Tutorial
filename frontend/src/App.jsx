@@ -2,12 +2,12 @@ import "./css/App.css";
 import Favorites from "./pages/Favorites";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { MovieProvider } from "./contexts/MovieContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import NavBar from "./components/NavBar";
 
-function ProtectedLayout() {
+function ProtectedRoute() {
   const { isAuthenticated, ready } = useAuth();
 
   if (!ready) {
@@ -22,11 +22,7 @@ function ProtectedLayout() {
     <>
       <NavBar />
       <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/favorites" element={<Favorites />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Outlet />
       </main>
     </>
   );
@@ -45,7 +41,11 @@ function AppRoutes() {
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
       />
-      <Route path="/*" element={<ProtectedLayout />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/favorites" element={<Favorites />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

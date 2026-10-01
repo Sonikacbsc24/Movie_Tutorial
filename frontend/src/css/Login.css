@@ -90,9 +90,49 @@
   border-color: transparent;
 }
 
-.login-hint {
+.mode-toggle {
   margin-top: 1.25rem;
-  color: #888;
-  font-size: 0.85rem;
-  line-height: 1.5;
+  width: 100%;
+  background: transparent;
+  color: #ccc;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.mode-toggle:hover {
+  color: #fff;
+  border-color: transparent;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    min-height: 100vh;
+    padding: 1rem;
+    align-items: stretch;
+  }
+
+  .login-card {
+    max-width: none;
+    width: 100%;
+    padding: 1.25rem;
+    border-radius: 8px;
+  }
+
+  .login-card h1 {
+    font-size: 1.5rem;
+  }
+
+  .login-form {
+    width: 100%;
+  }
+
+  .form-group input,
+  .login-button {
+    width: 100%;
+  }
 }

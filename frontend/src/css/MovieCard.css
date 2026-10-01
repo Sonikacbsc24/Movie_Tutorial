@@ -120,6 +120,7 @@
 @media (max-width: 768px) {
   .movie-card {
     font-size: 0.9rem;
+    max-width: none;
   }
 
   .movie-info {
@@ -130,5 +131,15 @@
     width: 32px;
     height: 32px;
     font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-info h3 {
+    font-size: 0.85rem;
+  }
+
+  .movie-info p {
+    font-size: 0.75rem;
   }
 }

@@ -1,6 +1,8 @@
 import { Component } from "react";
 import "../css/Dashboard.css";
 
+// CLASS COMPONENT: MovieStatsDashboard
+// Receives movies and favoritesCount as props and derives totals, average rating, and genre bars.
 class MovieStatsDashboard extends Component {
   getAverageRating() {
     const { movies } = this.props;

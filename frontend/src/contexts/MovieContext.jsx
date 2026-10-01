@@ -1,42 +1,79 @@
-import { createContext, useState, useContext, useEffect } from "react"
+import { createContext, useState, useContext, useEffect } from "react";
+import { useAuth } from "./AuthContext";
+import { getFavorites, saveFavorites } from "../services/api";
 
-const MovieContext = createContext()
+const MovieContext = createContext();
 
-export const useMovieContext = () => useContext(MovieContext)
+export const useMovieContext = () => useContext(MovieContext);
 
-export const MovieProvider = ({children}) => {
-    const [favorites, setFavorites] = useState([])
+export const MovieProvider = ({ children }) => {
+  const { user, ready } = useAuth();
+  const [favorites, setFavorites] = useState([]);
+  const userId = user?.id;
 
-    useEffect(() => {
-        const storedFavs = localStorage.getItem("favorites")
+  useEffect(() => {
+    if (!ready) return;
 
-        if (storedFavs) setFavorites(JSON.parse(storedFavs))
-    }, [])
-
-    useEffect(() => {
-        localStorage.setItem('favorites', JSON.stringify(favorites))
-    }, [favorites])
-
-    const addToFavorites = (movie) => {
-        setFavorites(prev => [...prev, movie])
+    if (!userId) {
+      setFavorites([]);
+      return;
     }
 
-    const removeFromFavorites = (movieId) => {
-        setFavorites(prev => prev.filter(movie => movie.id !== movieId))
-    }
-    
-    const isFavorite = (movieId) => {
-        return favorites.some(movie => movie.id === movieId)
-    }
+    let cancelled = false;
 
-    const value = {
-        favorites,
-        addToFavorites,
-        removeFromFavorites,
-        isFavorite
-    }
+    const loadFavorites = async () => {
+      const cached = localStorage.getItem(`favorites-${userId}`);
+      if (cached && !cancelled) {
+        setFavorites(JSON.parse(cached));
+      }
 
-    return <MovieContext.Provider value={value}>
-        {children}
-    </MovieContext.Provider>
-}
+      try {
+        const serverFavs = await getFavorites(userId);
+        if (!cancelled) {
+          setFavorites(serverFavs);
+          localStorage.setItem(`favorites-${userId}`, JSON.stringify(serverFavs));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    loadFavorites();
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, userId]);
+
+  const persistFavorites = (nextFavorites) => {
+    setFavorites(nextFavorites);
+
+    if (!userId) return;
+
+    localStorage.setItem(`favorites-${userId}`, JSON.stringify(nextFavorites));
+    saveFavorites(userId, nextFavorites).catch((error) => console.log(error));
+  };
+
+  const addToFavorites = (movie) => {
+    if (favorites.some((item) => item.id === movie.id)) return;
+    persistFavorites([...favorites, movie]);
+  };
+
+  const removeFromFavorites = (movieId) => {
+    persistFavorites(favorites.filter((movie) => movie.id !== movieId));
+  };
+
+  const isFavorite = (movieId) => {
+    return favorites.some((movie) => movie.id === movieId);
+  };
+
+  const value = {
+    favorites,
+    addToFavorites,
+    removeFromFavorites,
+    isFavorite,
+  };
+
+  return (
+    <MovieContext.Provider value={value}>{children}</MovieContext.Provider>
+  );
+};
